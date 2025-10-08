@@ -1,0 +1,20 @@
+# ignore files
+*.RProj
+*.png
+*.RData
+*.Rhistory
+.Rproj.user/
+01_motif_and_pathway_analysis/inputs/
+01_motif_and_pathway_analysis/outputs/
+02_conservation_analysis/inputs/
+02_conservation_analysis/outputs/
+03_disorder_analysis/inputs/
+03_disorder_analysis/outputs/
+04_AF3/inputs/
+04_AF3/outputs/
+05_summary/inputs/
+05_summary/outputs/
+
+
+
+
