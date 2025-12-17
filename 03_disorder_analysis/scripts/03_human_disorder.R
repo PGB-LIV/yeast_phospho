@@ -30,3 +30,8 @@ p1<-ggplot(data=combined, mapping=aes(x=res, y=disorder,fill=aa))+geom_boxplot()
   geom_hline(yintercept=0.5, linetype="dashed", color = "#888888",linewidth=1.5)
 
 ggsave("03_disorder_analysis/outputs/human_disorder.png",dpi=330, height=4, width=6)
+
+# violin plot
+p2<-ggplot(data=combined, mapping=aes(x=res, y=disorder,fill=aa))+geom_violin()+theme_bw()+labs(title="pSTY versus STY in humans")+scale_fill_manual(values=safe_colorblind_palette,name="")+ylab("Disorder score") + xlab("Residue")+ 
+  geom_hline(yintercept=0.5, linetype="dashed", color = "#888888",linewidth=1.5)
+ggsave("03_disorder_analysis/outputs/human_disorder_violin_plot.png",dpi=330, height=4, width=6)

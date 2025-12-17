@@ -1,9 +1,9 @@
 #!/bin/bash -l
 
-# usage sbatch 05_conservation_stats.sh
+# usage sbatch 06_conservation_export.sh
 
 # Define job name
-#SBATCH -J 05_conservation_stats.sh
+#SBATCH -J 06_conservation_export.sh
 # Define a standard output file. When the job is running, %u will be replaced by user name,
 # %N will be replaced by the name of the node that runs the batch script, and %j will be replaced by job id number.
 #SBATCH -o slurm_%J.%N.out
@@ -35,5 +35,5 @@ echo "Job array index              : $SLURM_ARRAY_TASK_ID"
 
 #############################################
 
-echo python3 05_find_conservation_of_ptm_within_all_yeast.py
-python3 05_find_conservation_of_ptm_within_all_yeast.py
+echo python3 06_Export_mapped_yeast_sites.py
+python3 06_Export_mapped_yeast_sites.py

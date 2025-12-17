@@ -253,6 +253,6 @@ for protein_id in protein_to_targets:
     test_counter += 1
 print(count_missing_alignnment, "missing alignments")
 missing_pos_ls= [pos for position in missing_pos for pos in position] # make list of lists into 1 list
-print(len(missing_pos_ls)) # from the 186 missing alignments, there are 5940 sites that are lost
+print(len(missing_pos_ls)) 
     #if test_counter == 5:
     #    exit()
