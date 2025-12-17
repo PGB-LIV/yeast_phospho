@@ -11,7 +11,7 @@
 # Define time limit
 #SBATCH -t 20:00:00
 # Define array length - number of files to search in samples.txt
-#SBATCH --array=1-5442
+#SBATCH --array=1-22
 # Define cores
 #SBATCH -c 10
 
@@ -26,7 +26,7 @@ echo "Job ID                       : $SLURM_JOB_ID"
 echo "Job array index              : $SLURM_ARRAY_TASK_ID"
 
 
-FILE=`sed -n ${SLURM_ARRAY_TASK_ID}p samples.txt`
+FILE=`sed -n ${SLURM_ARRAY_TASK_ID}p samples_failed.txt`
 
 OUTPUT=`basename -s _notaligned.fasta ${FILE}`.afa
 muscle/muscle5.1.linux_intel64 -align ${FILE} -output ${OUTPUT} -threads 10

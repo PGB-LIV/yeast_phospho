@@ -8,12 +8,11 @@ library(ggplot2)
 library(dplyr)
 library(gridExtra)
 library(reshape2)
-#library(ggvenn)
 library(dplyr)
 library(stringr)
 library(patchwork)
 
-safe_colorblind_palette <- c("#6699CC","#117733","#888888", "#AA4499","#CC6677","#DDCC77" )
+safe_colorblind_palette <- c("#6699CC","#117733", "#AA4499","#CC6677","#DDCC77" )
 
 ########################################################################
 #a)bar chart - count non-redundant and redundant phosphopep and sites  #
@@ -62,9 +61,6 @@ levels(df2$Count)<-c("FDR 0.01 PSM count", "FDR 0.01 phosphopeptide count")
 FLR<-read.csv("05_summary/inputs/all_datasets_merged_Site_Peptidoform_centric_Uniprot.tsv",sep="\t")
 table(FLR$Source.Dataset.Identifier)
 
-# 10 % FLR threshold col
-FLR$Site.Passes.Threshold..0.1.<-ifelse(FLR$Site.Q.Value<=0.1,1,0)
-
 # DF of all peptidoforms per PXD (including decoy sites)
 overall<-as.data.frame(table(FLR$Source.Dataset.Identifier))
 colnames(overall)<-c("Source.Dataset.Identifier", "sum")
@@ -72,11 +68,6 @@ overall$Count<-"Peptidoform-site count"
 
 # Remove decoy sites
 FLR<-subset(FLR,Decoy.Modification.Site==0)
-
-# DF of counts of peptidoforms at 10% FLR
-peptido_10<-FLR%>% group_by(Source.Dataset.Identifier)%>%
-  summarize(sum=sum(Site.Passes.Threshold..0.1.))
-peptido_10$Count<-"FLR 0.1 peptidoform-site count"
 
 # DF of counts of peptidoforms at 5% FLR
 peptido_5<-FLR%>% group_by(Source.Dataset.Identifier)%>%
@@ -89,7 +80,7 @@ peptido_1<-FLR%>% group_by(Source.Dataset.Identifier)%>%
 peptido_1$Count<-"FLR 0.01 peptidoform-site count"
 
 # Combine peptidoform counts
-peptidoform_overall<-rbind(overall,peptido_10,peptido_5,peptido_1)
+peptidoform_overall<-rbind(overall,peptido_5,peptido_1)
 # col for facet
 peptidoform_overall$Group<-"Peptidoform"
 # Add PSM and peptidoform counts
