@@ -6,11 +6,11 @@ from Bio import SeqIO
 import pandas as pd
 import os
 from itertools import chain
-
-if not os.path.exists("processing_files"):
-    os.mkdir("processing_files")
 if not os.path.exists("outputs"):
     os.mkdir("outputs")
+if not os.path.exists("outputs/processing_files"):
+    os.mkdir("outputs/processing_files")
+
 ###################################
 # 1 GSB Mappings                  # 
 #                                 #
@@ -39,21 +39,21 @@ id_convert = pd.read_excel("inputs/uniprotkb_proteome_UP000002311_2024_07_19.xls
 df_dict = id_convert.set_index("Entry")["Gene Names (ordered locus)"].to_dict() # better to use ordered locus - get complete mappings (alt. method was to loop through names and check to see if in FungiDB fasta but there are cases whereby there is a ordered locus name but it is not in FungiDB- check_ids.py)
 #https://www.statology.org/pandas-convert-dictionary-to-dataframe/
 df_convert = pd.DataFrame(list(df_dict.items()), columns=["uniprot_accession_id","ordered_locus_id"])
-df_convert.to_csv("processing_files/uniprot_id_to_ordered_locus.csv")
+df_convert.to_csv("outputs/processing_files/uniprot_id_to_ordered_locus.csv")
 # split on ; (multiple ids)
 df_convert["ordered_locus_id"] = df_convert["ordered_locus_id"].str.split("; ")
 # each mapping on own row
 df_convert = df_convert.explode("ordered_locus_id")
-df_convert.to_csv("processing_files/uniprot_id_to_ordered_locus_exploded.csv")
+df_convert.to_csv("outputs/processing_files/uniprot_id_to_ordered_locus_exploded.csv")
 # keep first mapping
 df_convert = df_convert.drop_duplicates(subset=["uniprot_accession_id"])
-df_convert.to_csv("processing_files/uniprot_id_to_ordered_locus_exploded_unique.csv")
+df_convert.to_csv("outputs/processing_files/uniprot_id_to_ordered_locus_exploded_unique.csv")
 
 
 # Add the ordered locus to the multiple mappings
 final = pd.merge(yeast_build_filtered, df_convert, how="left", on="uniprot_accession_id")
 final = final[["Protein", "Protein_pos", "PTM_residue", "uniprot_transcript_id","uniprot_accession_id","ordered_locus_id"]]
-final.to_csv("processing_files/GSB_converted.csv", index=False)
+final.to_csv("outputs/processing_files/GSB_converted.csv", index=False)
 
 ############################
 # 2. FungiDB               #
@@ -153,9 +153,9 @@ final["uniprot_id_comparison"] = final["uniprot_transcript_id"] == final["unipro
 final["comparison"] = final["uniprot_seq"] == final["fungi_seq"]
 
 
-final.to_csv("processing_files/final.csv", index=False)
+final.to_csv("outputs/processing_files/final.csv", index=False)
 final_non_dup = final.drop_duplicates("Protein")
-final_non_dup.to_csv("processing_files/final_non_dup.csv", index=False)
+final_non_dup.to_csv("outputs/processing_files/final_non_dup.csv", index=False)
 
 ######################################
 #                                    #
@@ -167,6 +167,6 @@ final_non_dup.to_csv("processing_files/final_non_dup.csv", index=False)
 final = final[final["comparison"] == True]
 final = final[["Protein","Protein_pos","PTM_residue","uniprot_accession_id","ordered_locus_id"]]
 # to csv
-final.to_csv("processing_files/final_filtered.csv", index=False)
+final.to_csv("outputs/processing_files/final_filtered.csv", index=False)
 # to tsv
 final.to_csv("outputs/GSB_STY_conservation_yeast.tsv", sep="\t",index=None)

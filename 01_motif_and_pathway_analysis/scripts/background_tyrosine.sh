@@ -1,6 +1,6 @@
 #!/bin/bash -l
 
-# usage sbatch background.sh
+# usage sbatch background_tyrosine.sh
 
 # Define job name
 #SBATCH -J background
@@ -11,12 +11,12 @@
 #SBATCH -e slurm_%J.%N.err
 # Define time limit
 #SBATCH -t 60:00:00
-# Define array length 
-#SBATCH --array=1-48 # !!!!!!! Set the second number to match exactly the count of files (lines) in .txt file!!!!!
+# Define array length - number of files 
+#SBATCH --array=1-48 # !!!!!!! Set the second number to match exactly the count of  files (lines) in .txt file!!!!!
 # Define cores  
 #SBATCH -c 1
 
-module load python
+module load python/3.10.0
 
 # List all modules
 module list
@@ -36,7 +36,7 @@ echo "Job array index              : $SLURM_ARRAY_TASK_ID"
 cd /home/hleboswe/hc-storage/
 
 # output directory for files per experiment
-OUTPUT_DIR="/home/hleboswe/hc-storage/yeast_motif/background_per_file"
+OUTPUT_DIR="/home/hleboswe/hc-storage/yeast_motif/background_per_file_tyrosine"
 
 # file_list_v2.txt contains list of FDR files
 # make this in linux as windows and linux have different end of line characters!
@@ -46,8 +46,8 @@ FILE=`sed -n ${SLURM_ARRAY_TASK_ID}p file_list_v2.txt`
 # PXD as basename
 BASE_NAME=$(echo "$FILE" | tr '/' '_')
 # output file: background_PXD.csv
-OUTPUT_FILE="$OUTPUT_DIR/background_${BASE_NAME}.csv"
+OUTPUT_FILE="$OUTPUT_DIR/tyr_background_${BASE_NAME}.csv"
 echo "Generating background: $FILE -> $OUTPUT_FILE"
 
 # Run the Python script
-python3 /mnt/hc-storage/users/hleboswe/yeast_motif/01_15mer_background_v3.py "$FILE" "$OUTPUT_FILE"
+python3 /mnt/hc-storage/users/hleboswe/yeast_motif/06_15mer_background_tyrosine.py "$FILE" "$OUTPUT_FILE"

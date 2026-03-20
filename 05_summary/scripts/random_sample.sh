@@ -1,9 +1,9 @@
 #!/bin/bash -l
 
-# usage sbatch background_combine.sh
+# usage sbatch random_sample.sh
 
 # Define job name
-#SBATCH -J background_combine
+#SBATCH -J sample
 # Define a standard output file. When the job is running, %u will be replaced by user name,
 # %N will be replaced by the name of the node that runs the batch script, and %j will be replaced by job id number.
 #SBATCH -o slurm_%J.%N.out
@@ -12,11 +12,12 @@
 # Define time limit
 #SBATCH -t 60:00:00
 # Define array length - number of files to search in samples.txt
-#SBATCH --array=1-1 
-# Define cores 
+#SBATCH --array=1-1 # !!!!!!! Set the second number to match exactly the count of raw files (lines) in samples.txt !!!!!
+# Define cores  # !!!! Make this match what you put in the Comet params file !!!!!
 #SBATCH -c 1
 
 module load python
+
 
 # List all modules
 module list
@@ -33,5 +34,5 @@ echo "Job array index              : $SLURM_ARRAY_TASK_ID"
 
 #############################################
 
-# Run the Python script
-python3 /mnt/hc-storage/users/hleboswe/yeast_motif/02_overall_background.py
+
+python3 random_sample.py

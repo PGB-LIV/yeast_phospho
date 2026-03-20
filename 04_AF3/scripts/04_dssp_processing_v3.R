@@ -16,9 +16,8 @@ library(patchwork)
 library(corrplot)
 library(chisq.posthoc.test)
 library(stringr)
-
+#https://stackoverflow.com/questions/57153428/r-plot-color-combinations-that-are-colorblind-accessible
 safe_colorblind_palette <- c("#6699CC","#117733", "#CC6677", "#888888")
-
 #############################
 # Plot 1                    # 
 # AA in struct (whole prot) #
@@ -113,15 +112,18 @@ chisq_df <- chisq_pval %>%
   )
 
 chisq_df$y_pos<-c(50000,50000,50000,220000,50000,255000,50000,60000)
+
+safe_colorblind_palette<-c("#332288","#88CCEE")
 p4<-ggplot(structure_sum,aes(y=aa_per_struct, x=factor(structure),fill=PTM_model))+ 
   geom_bar(position='dodge', stat='identity')+
   ylab("Amino acid count")+
   xlab("Structure")+
-  labs(fill="Model")+theme(text = element_text(size=10))+
+  labs(fill="Model")+theme(text = element_text(size=18))+
   scale_fill_manual(values=safe_colorblind_palette)+ggtitle("Secondary structural elements (protein level)")+
   theme_bw()+
-  geom_text(data=chisq_df,aes(x=Dimension, y=y_pos,label=signif_label), inherit.aes = FALSE) + 
-  scale_x_discrete(labels=c("Bend","Left-handed alpha-helix","3-10 helix", "Alpha-helix", "Pi-helix", "Loop", "Beta-bridge/Strand", "Turn"))
+  geom_text(data=chisq_df,aes(x=Dimension, y=y_pos,label=signif_label), inherit.aes = FALSE, size = 3.5) + 
+  scale_x_discrete(labels=c("Bend","Left-handed alpha-helix","3-10 helix", "Alpha-helix", "Pi-helix", "Loop", "Beta-bridge/Strand", "Turn")) +
+  scale_y_continuous(labels=scales::comma)
 p4
 
 ggsave("04_AF3/outputs/chi_sq_barplot.png",
@@ -209,7 +211,7 @@ ggsave("04_AF3/outputs/confidence_Thr_boxplot.png",dpi=330, height=5, width=5)
 # c. Tyr plot       #
 #####################
 
-# Filter for threonine (THR) and phosphothreonine (TPO)
+# Filter for tyrosine and phospho tyr
 tyr<-subset(confidence_score, X_atom_site.label_comp_id=="TYR"|X_atom_site.label_comp_id=="PTR")
 # column -> PTM model/phosphosite?
 tyr$group<-paste0(tyr$PTM_model,"_",tyr$phospho)
@@ -233,24 +235,25 @@ df<-read.csv("04_AF3/inputs/conf_merge.csv")
 df$group<-paste0(df$PTM_model,"_",df$phospho)
 
 ser<-subset(df, X_atom_site.label_comp_id=="SER"|X_atom_site.label_comp_id=="SEP")
+safe_colorblind_palette <- c("#888888","#44AA99", "#882255","#88CCEE")
 p9<-ggplot(ser,aes( y=mean_confidence_score, x=factor(X_struct_conf.conf_type_id),fill=group))+ geom_boxplot()+
-  theme_bw()+ylab("pLDDT mean atom score")+xlab("Structure")+ggtitle("Serine")+
-  scale_fill_manual(values=safe_colorblind_palette,name = "", 
+  theme_bw()+ylab("pLDDT mean atom score")+xlab("Structure")+ggtitle("A. Serine")+
+  scale_fill_manual(values=safe_colorblind_palette,name = "Model", 
                     labels = c("No PTM model/ not a phosphosite", "No PTM model/ phosphosite","PTM model/ not a phosphosite",
                                "PTM model/ phosphosite")) + scale_x_discrete(labels=c("Bend","Left-handed alpha-helix","3-10 helix",
                                                                                       "Alpha-helix", "Pi-helix", "Loop", "Beta-bridge/Strand",
-                                                                                      "Turn"))
+                                                                                      "Turn"))+theme(text = element_text(size=18))
 p9
 ggsave("04_AF3/outputs/confidence_ser_per_struct.png",dpi=330,width=14, height=5)
 
 thr<-subset(df, X_atom_site.label_comp_id=="THR"|X_atom_site.label_comp_id=="TPO")
 p10<-ggplot(thr,aes( y=mean_confidence_score, x=factor(X_struct_conf.conf_type_id),fill=group))+ geom_boxplot()+
-  theme_bw()+ylab("pLDDT mean atom score")+xlab("Structure")+ggtitle("Threonine")+
-  scale_fill_manual(values=safe_colorblind_palette,name = "", 
+  theme_bw()+ylab("pLDDT mean atom score")+xlab("Structure")+ggtitle("B. Threonine")+
+  scale_fill_manual(values=safe_colorblind_palette,name = "Model", 
                     labels = c("No PTM model/ not a phosphosite","No PTM model/ phosphosite","PTM model/ not a phosphosite",
                                "PTM model/ phosphosite")) + scale_x_discrete(labels=c("Bend","Left-handed alpha-helix","3-10 helix",
                                                                                      "Alpha-helix", "Pi-helix", "Loop", "Beta-bridge/Strand",
-                                                                                     "Turn"))
+                                                                                     "Turn"))+theme(text = element_text(size=18))
 
 p10
 ggsave("04_AF3/outputs/confidence_thr_per_struct.png",dpi=330,width=14,height=5)
@@ -265,7 +268,7 @@ ggsave("04_AF3/outputs/confidence_tyr_per_struct.png",dpi=330,width=14,height=5)
 
 # combine - ST only- we are exploring the disorder to order transition (from metapredict we know Tyrosine residues tend to be ordered in the non-phospho state)
 overall_plot <- p9 / p10 + plot_layout(axis_titles= "collect", guides= "collect")
-ggsave("04_AF3/outputs/confidence_per_structure_STY.png",plot= overall_plot,dpi=330, width=12,height=6)
+ggsave("04_AF3/outputs/confidence_per_structure_STY.png",plot= overall_plot,dpi=330, width=18,height=10)
 
 
 
@@ -335,13 +338,13 @@ alpha_helix_no_ptm<- subset(alpha_helix, group == "no_PTM_phospho")
 quantile(alpha_helix_no_ptm$aa_count)
 
 
-
+safe_colorblind_palette<-c("#44AA99", "#88CCEE")
 p15<-ggplot(df,aes(y=aa_count, x=factor(X_struct_conf.conf_type_id),fill=group))+ geom_boxplot(outliers = F)+
   theme_bw()+ylab("Length of structure (amino acids)")+xlab("Structure")+
   scale_fill_manual("Model",values=safe_colorblind_palette)+
-  scale_x_discrete(labels=c("Bend","Left-handed alpha-helix","3-10 helix", "Alpha-helix", "Pi-helix", "Loop", "Beta-bridge/Strand", "Turn"))
+  scale_x_discrete(labels=c("Bend","Left-handed alpha-helix","3-10 helix", "Alpha-helix", "Pi-helix", "Loop", "Beta-bridge/Strand", "Turn"))+theme(text = element_text(size=18))
 p15
-ggsave("04_AF3/outputs/length_struct_PTM_site.png",dpi=330, width=10, height=5)
+ggsave("04_AF3/outputs/length_struct_PTM_site.png",dpi=330, width=18, height=8)
 
 # remove other
 df<-subset(df, X_struct_conf.conf_type_id!="OTHER")

@@ -11,8 +11,8 @@
 #SBATCH -e slurm_%J.%N.err
 # Define time limit
 #SBATCH -t 60:00:00
-# Define array length - number of files to search in samples.txt
-#SBATCH --array=1-1 # !!!!!!! Set the second number to match exactly the count of raw files (lines) in samples.txt !!!!!
+# Define array length 
+#SBATCH --array=1-1 
 # Define cores  
 #SBATCH -c 1
 

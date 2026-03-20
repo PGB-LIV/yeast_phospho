@@ -1,9 +1,9 @@
 #!/bin/bash -l
 
-# usage sbatch background_combine.sh
+# usage sbatch GSB_per_build_size.sh
 
 # Define job name
-#SBATCH -J background_combine
+#SBATCH -J GSB
 # Define a standard output file. When the job is running, %u will be replaced by user name,
 # %N will be replaced by the name of the node that runs the batch script, and %j will be replaced by job id number.
 #SBATCH -o slurm_%J.%N.out
@@ -11,9 +11,9 @@
 #SBATCH -e slurm_%J.%N.err
 # Define time limit
 #SBATCH -t 60:00:00
-# Define array length - number of files to search in samples.txt
+# Define array length 
 #SBATCH --array=1-1 
-# Define cores 
+# Define cores  
 #SBATCH -c 1
 
 module load python
@@ -33,5 +33,6 @@ echo "Job array index              : $SLURM_ARRAY_TASK_ID"
 
 #############################################
 
-# Run the Python script
-python3 /mnt/hc-storage/users/hleboswe/yeast_motif/02_overall_background.py
+cd /home/hleboswe/hc-storage/
+
+python3 /home/hleboswe/hc-storage/yeast_GSB_per_build_size/02_GSB_counts_per_build_size.py file_list_v2.txt NA NA NA 2 1 rev_ CONTAM_ phospho:STY:A
