@@ -2,7 +2,7 @@
 
 
 # Define job name
-#SBATCH -J muscle
+#SBATCH -J muscle_clean
 # Define a standard output file. When the job is running, %u will be replaced by user name,
 # %N will be replaced by the name of the node that runs the batch script, and %j will be replaced by job id number.
 #SBATCH -o slurm_%J.%N.out
@@ -13,7 +13,7 @@
 # Define array length - number of files to search in samples.txt
 #SBATCH --array=1-1
 # Define cores
-#SBATCH -c 4
+#SBATCH -c 1
 
 echo =========================================================
 echo SLURM job: submitted date = $(date)

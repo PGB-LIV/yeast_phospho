@@ -12,18 +12,21 @@ for line in f:
 f.close()
 
 # file containing conservation results
-f = open("outputs/conservation_stats_yeast/stat_summary.tsv","r")
-f_out = open("outputs/mapped_yeast_sites.tsv","w")
-f_out.write("Protein\tPosition\tGenome\tPredicted_sequence\tMapped_yeast_site\n")
+f = open("outputs/conservation_stats_yeast/summary_stats.tsv","r")
+
+f_out = open("outputs/Supplementary_File_8_mapped_yeast_sites.tsv","w")
+f_out.write("Protein\tPosition\tGenome\tPredicted_sequence\tMapped_yeast_site_FungiDB_ID\tMapped_yeast_site_UniProt_ID\n")
 
 for line in f:
     line = line.rstrip()
     cells = line.split("\t")
     # yeast protein, PTM pos, residue
-    yeast_prot_pos_res = cells[0] + "_" + cells[1] + "_" + cells[2]
+    yeast_prot_pos_res = cells[0] + "_" + cells[2] + "_" + cells[3]
+    yeast_prot_pos_res_uniprot = cells[1] + "_" + cells[2] + "_" + cells[3]
+
     # mapped sites  
-    if cells[11] != "":
-        mapped_prots = cells[11].split(";")
+    if cells[12] != "":
+        mapped_prots = cells[12].split(";")
         for mapped_prot in mapped_prots:
             #print(mapped_prot)
             mapped_prot_splitup = mapped_prot.rsplit("_",1)
@@ -35,4 +38,4 @@ for line in f:
             if mapped_prot_id in geneprefix_to_species:
                 genome = geneprefix_to_species[mapped_prot_id][0]
                 seq = geneprefix_to_species[mapped_prot_id][1]
-            f_out.write(mapped_prot_id + "\t" + mapped_prot_pos + "\t" + genome + "\t" + seq + "\t" + yeast_prot_pos_res + "\n" )
+            f_out.write(mapped_prot_id + "\t" + mapped_prot_pos + "\t" + genome + "\t" + seq + "\t" + yeast_prot_pos_res + "\t" + yeast_prot_pos_res_uniprot + "\n" )

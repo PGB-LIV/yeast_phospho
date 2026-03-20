@@ -12,7 +12,7 @@ library(dplyr)
 library(stringr)
 library(patchwork)
 
-safe_colorblind_palette <- c("#6699CC","#117733", "#AA4499","#CC6677","#DDCC77" )
+safe_colorblind_palette <- c("#6699CC","#117733", "#AA4499","#CC6677","#DDCC77")
 
 ########################################################################
 #a)bar chart - count non-redundant and redundant phosphopep and sites  #
@@ -44,7 +44,7 @@ FLR_counts[c('PXD', 'exp')]  <- str_split_fixed(FLR_counts$Dataset, '/', 2)
 # Add counts per PXD for each category
 df2 <- FLR_counts %>% group_by(PXD,Count) %>%
   summarize(sum = sum(value))
-# Rename coluymns for later merging
+# Rename columns for later merging
 colnames(df2)<-c("Source.Dataset.Identifier", "Count","sum")
 # Reorder columns for later merging
 df2<-df2[,c("Source.Dataset.Identifier","sum","Count")]
@@ -98,13 +98,15 @@ psm<-ggplot2::ggplot(df2, aes(fill=Count, y=as.numeric(sum), x=Source.Dataset.Id
 
 
 peptido<-ggplot2::ggplot(peptidoform_overall, aes(fill=Count, y=as.numeric(sum), x=Source.Dataset.Identifier)) + geom_bar(position='dodge', stat='identity')+
-  theme(axis.text.x = element_text(angle = 45 , hjust=1))+facet_grid(factor(Group, levels=c("PSM","Peptidoform")) ~ ., scales="free_y")+
-  scale_fill_manual(values=safe_colorblind_palette[3:7])+
+  theme(axis.text.x = element_text(angle = 45 , hjust=1))+
+  ggtitle("B.")+
+  scale_fill_manual(values=safe_colorblind_palette[3:7], name="Peptidoform FLR category")+
   theme(
     panel.background = element_rect(fill='transparent'),
     plot.background = element_rect(fill='transparent', color=NA),
     panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank())+xlab("Data set")+ylab("Count")+theme(legend.title=element_blank())+theme(text = element_text(size=11))
+    panel.grid.minor = element_blank())+xlab("Data set")+ylab("Count")+theme(text = element_text(size=18))+
+    scale_y_continuous(labels=scales::comma)
 
 
 # patchwork plot
@@ -123,20 +125,18 @@ cat_counts<-melt(table(cat_counts))
 
 level_order<-c("Bronze","Silver","Gold")
 
-c<-ggplot(cat_counts,aes(fill=PTM_residue, y=value, x=factor(PTM_FLR_category,level=level_order)))+ 
+gsb_summary<-ggplot(cat_counts,aes(fill=PTM_residue, y=value, x=factor(PTM_FLR_category,level=level_order)))+ 
   geom_bar(position='dodge', stat='identity')+
-  geom_text(aes(label = value),size = 3, vjust = -0.5, position = position_dodge(.9))+
+  geom_text(aes(label = value),size = 4, vjust = -0.4, position = position_dodge(0.9))+
   ylab("Count of sites")+
   xlab("Category")+
-  labs(fill="Phosphosite residue")+
-  ggtitle("B.")+theme(text = element_text(size=11))+
-  scale_fill_manual(values=safe_colorblind_palette)+
+  ggtitle("C.")+theme(text = element_text(size=18))+
+  scale_fill_manual(values=safe_colorblind_palette,name="Phosphosite residue")+
   theme(
     panel.background = element_rect(fill='transparent'),
     plot.background = element_rect(fill='transparent', color=NA),
     panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank())
-c
+    panel.grid.minor = element_blank())+scale_y_continuous(labels=scales::comma)
 
 
 
@@ -150,9 +150,9 @@ counts_noA$log_PSM<-log10(counts_noA$Sum_of_PSM_counts.5.FLR.)
 level_order<-c("Bronze","Silver","Gold")
 safe_colorblind_palette <- c("#6699CC","#117733", "#CC6677")
 
-e<-ggplot(data=counts_noA,aes(y=log_PSM, x=factor(PTM_residue), fill=PTM_residue))+ 
+psm_counts<-ggplot(data=counts_noA,aes(y=log_PSM, x=factor(PTM_residue), fill=PTM_residue))+ 
   geom_boxplot()+facet_wrap(~factor(PTM_FLR_category,level=level_order))+theme_bw()+
-  scale_fill_manual(values=safe_colorblind_palette,name="Phosphosite residue")+ylab("log10(PSM count)")+ xlab("Residue")+ggtitle("C.")+theme(text = element_text(size=11))
+  scale_fill_manual(values=safe_colorblind_palette,name="Phosphosite residue")+ylab("log10(PSM count)")+ xlab("Residue")+ggtitle("D.")+theme(text = element_text(size=18))
 
 
 ##############
@@ -160,8 +160,30 @@ e<-ggplot(data=counts_noA,aes(y=log_PSM, x=factor(PTM_residue), fill=PTM_residue
 ##############
 
 #patchwork
-patch_plot<-b/(c|e)
-patch_plot<-(b/(c|e))+plot_layout(heights=c(0.5,0.5,1), nrow = 3)
-ggsave("05_summary/outputs/yeast_phosphobuild_summary.png",plot=patch_plot,dpi=330, width=16,height=12)
+#patch_plot<-b/(c|e)
+#ggsave("05_summary/outputs/yeast_phosphobuild_summary.png",plot=patch_plot,dpi=330, width=16,height=12)
+patch_plot<-peptido/(gsb_summary|psm_counts)
+ggsave("05_summary/outputs/yeast_phosphobuild_summary_JPR.png",plot=patch_plot,dpi=330, width=18,height=10)
 
+#####################
+# STY distribution  #
+#####################
 
+# Distribution of STY in GSB
+table(counts_noA$PTM_FLR_category)
+table(counts_noA$PTM_FLR_category)/56694
+
+# gold 
+gold <- subset(counts_noA, PTM_FLR_category  == "Gold")
+table(gold$PTM_residue)
+table(gold$PTM_residue)/22311 #total in gold  
+
+# silver 
+silver <- subset(counts_noA, PTM_FLR_category  == "Silver")
+table(silver$PTM_residue)
+table(silver$PTM_residue)/9890  #total in silver
+
+# bronze 
+bronze <- subset(counts_noA, PTM_FLR_category  == "Bronze")
+table(bronze$PTM_residue)
+table(bronze$PTM_residue)/24493    #total in bronze

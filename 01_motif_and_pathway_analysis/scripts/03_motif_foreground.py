@@ -3,7 +3,7 @@
 # https://github.com/PGB-LIV/Rice_Phospho_Manuscript/blob/main/motif_seqs.py       #       
 # creates:                                                                         #  
 # 1. foreground = GSB protein sites - 15mers                                       #
-# 2. clusterProfiler background = all phosphoproteins in GSB                       #
+# 2. clusterProfiler background = gold phosphoproteins in GSB                      #
 ####################################################################################
 import pandas as pd
 from Bio import SeqIO
@@ -145,12 +145,19 @@ for seq, proteins, file_name, ptm_positions in zip(all_seq_list, all_proteins, n
 
 
 ####################################
-#All phospho-proteins background   #
+#Gold phospho-proteins background  #
 #                                  #  
 ####################################
-# Loop through GSB proteins, get UniProt accession, remove duplicates
+# Loop through Gold proteins, get UniProt accession, remove duplicates
+# gold sites only
+df_gold = df[df['PTM_FLR_category'] == "Gold"] 
+# ST sites
+df_gold_st = df_gold[df_gold['PTM_residue'].isin(["S", "T"])]
+df_gold_st.to_csv("cp_background.csv")
+background_protein_list = df_gold_st['Protein'].to_list()
+
 updated_protein_list = []
-for protein in (protein_list):
+for protein in (background_protein_list):
     # UniProt accession ("|")
     protein_2 = protein.split("|")[1]
     updated_protein_list.append(protein_2)

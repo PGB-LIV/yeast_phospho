@@ -9,7 +9,7 @@
 ##################################################################################
 from Bio import AlignIO
 import os
-
+import pandas as pd
 
 ### Reads protein MSA and extracts the amino acids in the alignment at the given target positions of the target protein
 ### Returns a dictionary of results
@@ -170,10 +170,12 @@ def calculate_conservation_scores_per_ptm_site(protein_id,pos_res_dict,amino_aci
 
                 if proximal_match and soft_match and protein !=reference_protein:
                     mapped_protein_sites.append(protein + "_" + str(original_positions_for_pos[protein]))
-
+        # convert ID of target protein to UniProt ID
+        target_protein_uniprot_id = fungidb_to_uniprot_id[protein_id]
         
-         #230924 added soft match count /uniq species in ortho file ie 272
+        #230924 added soft match count /uniq species in ortho file ie 272
         f_out.write(protein_id + "\t" +
+                    target_protein_uniprot_id + "\t" +
                     str(pos) + "\t" +
                     target_res + "\t" +
                     reference_proximal_res + "\t" +
@@ -220,18 +222,31 @@ def get_all_target_sites(protein_ptm_file,prot_col,pos_col,residue_col):
 
     return protein_to_positions
 
-
+# function for converting between ID types - needed to add UniProt ID to final output
+def id_conversion(protein_ptm_file, uniprot_col, fungidb_col):
+    yeast_sty_conservation = pd.read_csv(protein_ptm_file, sep = '\t') 
+    yeast_id_conversion = yeast_sty_conservation[[uniprot_col, fungidb_col]]
+    yeast_id_conversion = yeast_id_conversion.drop_duplicates()
+    print("rows:", len(yeast_id_conversion.index))
+    print("unique uniprot:", len(pd.unique(yeast_id_conversion[uniprot_col])))
+    print("unique ordered locus", len(pd.unique(yeast_id_conversion[fungidb_col])))
+    #https://pynative.com/convert-pandas-dataframe-to-dict/	
+    id_dict = yeast_id_conversion.set_index(fungidb_col).to_dict()[uniprot_col]
+    return id_dict
 
 DATA_FOLDER = "outputs/conservation_stats_yeast/"
 ALIGNMENT_FOLDER = "outputs/fastas_pre_aligment_syntenic_Sept24/fastas_yeast/"
+TARGET_FILE = "outputs/GSB_STY_conservation_yeast.tsv"
 
 if os.path.exists(DATA_FOLDER) == False:
     os.mkdir(DATA_FOLDER)
 
 
-TARGET_FILE = "outputs/GSB_STY_conservation_yeast.tsv"
-
+# target sites
 protein_to_targets = get_all_target_sites(TARGET_FILE,4,1,2)
+# id conversion
+fungidb_to_uniprot_id = id_conversion(TARGET_FILE, "uniprot_accession_id", "ordered_locus_id")
+
 missing_pos = []
 count_missing_alignnment=0
 test_counter = 0

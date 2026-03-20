@@ -11,9 +11,9 @@
 #SBATCH -e slurm_%J.%N.err
 # Define time limit
 #SBATCH -t 160:00:00
-# Define array length - number of files to search in samples.txt
-#SBATCH --array=1-1 # !!!!!!! Set the second number to match exactly the count of raw files (lines) in samples.txt !!!!!
-# Define cores  # !!!! Make this match what you put in the Comet params file !!!!!
+# Define array length 
+#SBATCH --array=1-1 
+# Define cores  
 #SBATCH -c 1
 
 module load python
